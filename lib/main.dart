@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'screens/sign_up_screen.dart';
 import 'screens/sign_in_screen.dart';
 import 'screens/main_screen.dart';
+import 'package:provider/provider.dart';
+import 'providers/auth_provider.dart';
 
 void main() {
   runApp(MyApp());
@@ -12,18 +14,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Navigation',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (ctx) => AuthProvider()),
+      ],
+      child: Consumer<AuthProvider>(
+        builder: (ctx, auth, _) => MaterialApp(
+          title: 'Flutter Navigation',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: auth.isAuthenticated ? MainScreen() : HomeScreen(),
+          routes: {
+            '/signup': (context) => SignUpScreen(),
+            '/signin': (context) => SignInScreen(),
+            '/home': (context) => HomeScreen(),
+            '/main': (context) => MainScreen(),
+          },
+        ),
       ),
-      home: HomeScreen(),
-      routes: {
-        '/signup': (context) => SignUpScreen(),
-        '/signin': (context) => SignInScreen(),
-        '/home': (context) => HomeScreen(),
-        '/main': (context) => MainScreen(),
-      },
     );
   }
 }
