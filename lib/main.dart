@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
-import 'screens/sign_up_screen.dart';
+import 'package:provider/provider.dart';
+import 'screens/register_screen.dart';
 import 'screens/sign_in_screen.dart';
 import 'screens/main_screen.dart';
-import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => AuthProvider()..tryAutoLogin(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -14,24 +19,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (ctx) => AuthProvider()),
-      ],
-      child: Consumer<AuthProvider>(
-        builder: (ctx, auth, _) => MaterialApp(
-          title: 'Flutter Navigation',
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-          ),
-          home: auth.isAuthenticated ? MainScreen() : HomeScreen(),
-          routes: {
-            '/signup': (context) => SignUpScreen(),
-            '/signin': (context) => SignInScreen(),
-            '/home': (context) => HomeScreen(),
-            '/main': (context) => MainScreen(),
-          },
-        ),
+    return MaterialApp(
+      title: 'App Flutter',
+      debugShowCheckedModeBanner: false,
+      routes: {
+        '/register': (context) => const RegisterScreen(),
+        '/main': (context) => const MainScreen(),
+        '/login': (context) => LoginScreen(), // Añadir esta línea
+      },
+      home: Consumer<AuthProvider>(
+        builder: (context, auth, _) {
+          return auth.isAuthenticated ? const MainScreen() : const HomeScreen();
+        },
       ),
     );
   }
@@ -44,34 +43,29 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Welcome'),
+        title: const Text('Welcome'),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/signup');
-                    },
-                    child: Text('Create an Account'),
-                  ),
-                  SizedBox(width: 16), 
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/signin');
-                    },
-                    child: Text('Sign In'),
-                  ),
-                ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/register');
+                },
+                child: const Text('Create an Account'),
               ),
-            ),
-          ],
+              const SizedBox(width: 16),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/login');
+                },
+                child: const Text('Sign In'),
+              ),
+            ],
+          ),
         ),
       ),
     );

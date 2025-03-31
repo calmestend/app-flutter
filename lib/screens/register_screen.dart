@@ -2,47 +2,52 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({Key? key}) : super(key: key);
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _RegisterScreenState createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _passwordConfirmController =
+      TextEditingController();
   bool _loading = false;
   String? _errorMessage;
 
-  void _login() async {
+  void _register() async {
     setState(() {
       _loading = true;
       _errorMessage = null;
     });
 
-    final url = Uri.parse("http://localhost:8000/login");
+    final url = Uri.parse("http://localhost:8000/register");
     final response = await http.post(
       url,
       headers: {
         "Accept": "application/json",
       },
       body: {
+        "name": _nameController.text,
         "email": _emailController.text,
         "password": _passwordController.text,
+        "password_confirmation": _passwordConfirmController.text,
       },
     );
 
     print("Response Status Code: ${response.statusCode}");
     print("Response Body: ${response.body}");
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201) {
       final data = jsonDecode(response.body);
-      print("User logged in successfully: ${data["user"]}");
+      print("User registered successfully: ${data["user"]}");
       Navigator.pushReplacementNamed(context, '/main');
     } else {
       setState(() {
-        _errorMessage = "Error en el login: ${response.body}";
+        _errorMessage = "Error en el registro: ${response.body}";
       });
     }
 
@@ -55,13 +60,17 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
+        title: const Text('Register'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
             children: [
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Name'),
+              ),
               TextField(
                 controller: _emailController,
                 decoration: const InputDecoration(labelText: 'Email'),
@@ -71,6 +80,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: const InputDecoration(labelText: 'Password'),
                 obscureText: true,
               ),
+              TextField(
+                controller: _passwordConfirmController,
+                decoration:
+                    const InputDecoration(labelText: 'Confirm Password'),
+                obscureText: true,
+              ),
               const SizedBox(height: 20),
               if (_errorMessage != null)
                 Text(
@@ -78,10 +93,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: const TextStyle(color: Colors.red),
                 ),
               ElevatedButton(
-                onPressed: _loading ? null : _login,
+                onPressed: _loading ? null : _register,
                 child: _loading
                     ? const CircularProgressIndicator()
-                    : const Text('Login'),
+                    : const Text('Register'),
               ),
             ],
           ),
@@ -90,3 +105,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+
