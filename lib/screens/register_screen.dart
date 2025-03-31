@@ -24,7 +24,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _errorMessage = null;
     });
 
-    final url = Uri.parse("http://localhost:8000/register");
+    final url = Uri.parse("http://10.0.2.2:8000/register");
     final response = await http.post(
       url,
       headers: {
@@ -105,4 +105,3 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 }
-
