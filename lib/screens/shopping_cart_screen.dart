@@ -44,14 +44,14 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
           });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to load cart products')),
+            const SnackBar(content: Text('Error al cargar los productos')),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Network error: $e')),
+          SnackBar(content: Text('Error de red: $e')),
         );
       }
     } finally {
@@ -76,14 +76,14 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
           _fetchCartProducts();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to add product')),
+            const SnackBar(content: Text('Error al agregar el producto')),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Network error: $e')),
+          SnackBar(content: Text('Error de red: $e')),
         );
       }
     }
@@ -103,14 +103,14 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
           _fetchCartProducts();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to remove product')),
+            const SnackBar(content: Text('Error al eliminar el producto')),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Network error: $e')),
+          SnackBar(content: Text('Error de red: $e')),
         );
       }
     }
@@ -149,12 +149,12 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
 
         if (result == 'success') {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Payment successful!')),
+            const SnackBar(content: Text('¡Pago exitoso!')),
           );
           _fetchCartProducts();
         } else if (result == 'cancel') {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Payment cancelled')),
+            const SnackBar(content: Text('Pago cancelado')),
           );
         }
       } else if (response.statusCode == 302) {
@@ -178,12 +178,12 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
 
           if (result == 'success') {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Payment successful!')),
+              const SnackBar(content: Text('¡Pago exitoso!')),
             );
             _fetchCartProducts();
           } else if (result == 'cancel') {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Payment cancelled')),
+              const SnackBar(content: Text('Pago cancelado')),
             );
           }
         }
@@ -191,7 +191,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Payment error: $e')),
+          SnackBar(content: Text('Error en el pago: $e')),
         );
       }
     } finally {
@@ -205,70 +205,213 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Calcular el total de la compra
+    double total = 0.0;
+    for (var product in products) {
+      total += double.parse(product['price'].toString()) *
+          product['pivot']['quantity'];
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Shopping Cart'),
+        title: const Text('Carrito de Compras'),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: _fetchCartProducts,
-              child: ListView(
-                padding: const EdgeInsets.all(8.0),
+              child: Column(
                 children: [
-                  if (products.isEmpty)
-                    const Center(child: Text('No hay productos aún'))
-                  else
-                    Column(
-                      children: products.map((product) {
-                        return Card(
-                          margin: const EdgeInsets.symmetric(
-                            vertical: 4,
-                            horizontal: 8,
-                          ),
-                          child: ListTile(
-                            title: Text(product['name']),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.all(16.0),
+                      children: [
+                        if (products.isEmpty)
+                          Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(product['description']),
+                                Icon(
+                                  Icons.shopping_cart_outlined,
+                                  size: 64,
+                                  color: Colors.grey[400],
+                                ),
+                                const SizedBox(height: 16),
                                 Text(
-                                    'Cantidad: ${product['pivot']['quantity']}'),
+                                  'No hay productos en el carrito',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
                               ],
                             ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.remove),
-                                  onPressed: () =>
-                                      _removeProduct(product['id']),
+                          )
+                        else
+                          ...products.map((product) {
+                            return Card(
+                              elevation: 2,
+                              margin: const EdgeInsets.only(bottom: 16),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                product['name'],
+                                                style: const TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                product['description'],
+                                                style: TextStyle(
+                                                  color: Colors.grey[600],
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Text(
+                                          '\$${double.parse(product['price'].toString()).toStringAsFixed(2)}',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: Colors.grey[300]!,
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              IconButton(
+                                                icon: const Icon(Icons.remove),
+                                                onPressed: () => _removeProduct(
+                                                    product['id']),
+                                                color: Theme.of(context)
+                                                    .primaryColor,
+                                              ),
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 12),
+                                                child: Text(
+                                                  '${product['pivot']['quantity']}',
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                              IconButton(
+                                                icon: const Icon(Icons.add),
+                                                onPressed: () =>
+                                                    _addProduct(product['id']),
+                                                color: Theme.of(context)
+                                                    .primaryColor,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Text(
+                                          'Total: \$${(double.parse(product['price'].toString()) * product['pivot']['quantity']).toStringAsFixed(2)}',
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                                IconButton(
-                                  icon: const Icon(Icons.add),
-                                  onPressed: () => _addProduct(product['id']),
+                              ),
+                            );
+                          }).toList(),
+                      ],
+                    ),
+                  ),
+                  if (products.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.2),
+                            spreadRadius: 1,
+                            blurRadius: 5,
+                            offset: const Offset(0, -3),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Total a pagar:',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              ],
+                              ),
+                              Text(
+                                '\$${total.toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: _createPayment,
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: const Size(double.infinity, 50),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              'Proceder al pago',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        );
-                      }).toList(),
+                        ],
+                      ),
                     ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _createPayment,
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 50),
-                    ),
-                    child: const Text('Pagar'),
-                  ),
-                  if (paymentUrl != null) ...[
-                    const SizedBox(height: 16.0),
-                    Text(
-                      'Payment URL: $paymentUrl',
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -301,11 +444,6 @@ class _WebViewScreenState extends State<WebViewScreen> {
   }
 
   void _initWebView() async {
-    // Para versiones recientes de webview_flutter ya no es necesario llamar a setAcceptCookie.
-    // if (Platform.isAndroid) {
-    //   await WebViewCookieManager().setAcceptCookie(true);
-    // }
-
     late final PlatformWebViewControllerCreationParams params;
 
     if (Platform.isAndroid) {
@@ -344,7 +482,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
             setState(() {
               isLoading = false;
             });
-            controller.runJavaScript('''
+            controller.runJavaScript('''\
               document.cookie = "cookiesEnabled=true; path=/";
               localStorage.setItem('cookiesEnabled', 'true');
             ''');
@@ -364,14 +502,12 @@ class _WebViewScreenState extends State<WebViewScreen> {
             }
             return NavigationDecision.navigate;
           },
-          onWebResourceError: (WebResourceError error) {
-          },
+          onWebResourceError: (WebResourceError error) {},
         ),
       )
       ..addJavaScriptChannel(
         'PayPalBridge',
-        onMessageReceived: (JavaScriptMessage message) {
-        },
+        onMessageReceived: (JavaScriptMessage message) {},
       )
       ..setUserAgent(
         'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36',
@@ -383,7 +519,6 @@ class _WebViewScreenState extends State<WebViewScreen> {
       androidController.setMediaPlaybackRequiresUserGesture(false);
     }
 
-    // Cargar el HTML especificando la URL base para que el documento tenga origen definido
     controller.loadHtmlString(
       widget.htmlContent,
       baseUrl: widget.url,
@@ -396,7 +531,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('PayPal Payment'),
+        title: const Text('Pago con PayPal'),
         actions: [
           IconButton(
             icon: const Icon(Icons.close),
@@ -418,3 +553,4 @@ class _WebViewScreenState extends State<WebViewScreen> {
     );
   }
 }
+

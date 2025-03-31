@@ -35,13 +35,13 @@ class _ProductsScreenState extends State<ProductsScreen> {
         });
       } else {
         setState(() {
-          _errorMessage = "Error fetching products: ${response.body}";
+          _errorMessage = "Error al cargar los productos: ${response.body}";
           _loading = false;
         });
       }
     } catch (e) {
       setState(() {
-        _errorMessage = "Error fetching products: $e";
+        _errorMessage = "Error al cargar los productos: $e";
         _loading = false;
       });
     }
@@ -63,17 +63,17 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Product added to cart')),
+          SnackBar(content: Text('Producto agregado al carrito')),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('Failed to add product to cart: ${response.body}')),
+              content: Text('Error al agregar al carrito: ${response.body}')),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add product to cart: $e')),
+        SnackBar(content: Text('Error al agregar al carrito: $e')),
       );
     }
   }
@@ -82,7 +82,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Products'),
+        title: const Text('Productos'),
       ),
       body: _loading
           ? Center(child: CircularProgressIndicator())
@@ -92,14 +92,80 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       Text(_errorMessage!, style: TextStyle(color: Colors.red)))
               : ListView.builder(
                   itemCount: _products.length,
+                  padding: EdgeInsets.all(16),
                   itemBuilder: (context, index) {
                     final product = _products[index];
-                    return ListTile(
-                      title: Text(product["name"]),
-                      subtitle: Text(product["description"]),
-                      trailing: ElevatedButton(
-                        onPressed: () => _addToCart(product["id"]),
-                        child: Text("Agregar al carrito"),
+                    return Card(
+                      margin: EdgeInsets.only(bottom: 16),
+                      child: Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    product["name"],
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  'Stock: ${product["stock"]}',
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              product["description"],
+                              style: TextStyle(
+                                color: Colors.grey[700],
+                                fontSize: 14,
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Precio: \$${product["price"]}',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () => _addToCart(product["id"]),
+                                  style: ElevatedButton.styleFrom(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    "Agregar al carrito",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
@@ -107,3 +173,4 @@ class _ProductsScreenState extends State<ProductsScreen> {
     );
   }
 }
+
